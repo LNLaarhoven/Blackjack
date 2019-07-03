@@ -42,6 +42,27 @@ public class Player {
 		for (int i = 0; i < this.hand.size(); i++) {
 			this.handValue += this.hand.get(i).getCardValue();
 		}
-		
+		if(!this.changeAceValue()) {
+			this.setBusted(true);
+		}
+	}
+	
+	private boolean changeAceValue() {
+		if(this.handValue > 21) {
+			for (int i = 0; i < this.hand.size(); i++) {
+				if (this.hand.get(i).getCardName().endsWith("A") && this.hand.get(i).getCardValue() == 11) {
+					this.hand.get(i).setCardValue(1);
+					this.handValue -= 10;
+					
+					System.out.println("Changed value of " + this.hand.get(i).getCardName() + " from 11 to 1.");
+					
+					if (this.handValue <= 21) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		return true;
 	}
 }
