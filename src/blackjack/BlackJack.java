@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class BlackJack {
 	
@@ -42,6 +44,8 @@ public class BlackJack {
 
 	private void startGame() {
 		Scanner input = new Scanner(System.in);
+		Timer timer = new Timer();
+		TimerTask task = new Helper();
 		
 		System.out.println("Type in a to add a player, r to remove a player, s to start a round and q to quit the game.");
 		String in = input.nextLine();
@@ -113,7 +117,6 @@ public class BlackJack {
 			}
 		}
 		
-		//@TODO compare results and declare winner
 		if (this.dealer.isBusted()) {
 			for (int i = 0; i < this.amountOfPlayers; i++) {
 				if (this.players.get(i).isBusted()) {
@@ -152,9 +155,9 @@ public class BlackJack {
 	}
 	
 	private void resetDeck() {
-		for(int i = 0; i < this.players.size(); i++) {
-			this.deck.addAll(this.players.get(i).getHand());
-			this.players.get(i).setHand(null);
+		for(Player player: this.players) {
+			this.deck.addAll(player.getHand());
+			player.setHand(null);
 		}
 	}
 }

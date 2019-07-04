@@ -7,6 +7,7 @@ public class Player {
 	private int handValue;
 	private boolean isBusted;
 	
+	
 	public Player() {
 		this.setHand(new ArrayList<>());
 		this.setHandValue(0);
