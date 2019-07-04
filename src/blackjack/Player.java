@@ -65,4 +65,11 @@ public class Player {
 		}
 		return true;
 	}
+	
+	public void printHand() {
+		for (int i = 0; i < this.hand.size(); i++) {
+			System.out.print(this.hand.get(i).getCardName() + " ");
+		}
+		System.out.print("\n");
+	}
 }
