@@ -13,6 +13,12 @@ public class Player {
 		this.setHandValue(0);
 		this.setBusted(false);
 	}
+	
+	public void resetPlayer() {
+		this.hand = new ArrayList<>();
+		this.handValue = 0;
+		this.isBusted = false;
+	}
 
 	public ArrayList<Card> getHand() {
 		return hand;
