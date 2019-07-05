@@ -3,6 +3,7 @@ package blackjack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.Timer;
 
 public class BlackJack {
 
@@ -10,7 +11,6 @@ public class BlackJack {
 	private ArrayList<Player> players;
 	private Dealer dealer;
 	private char[] symbol = { 'H', 'D', 'C', 'S' };
-	private int amountOfPlayers = 0;
 
 	public BlackJack() {
 		this.initializeDeck();
@@ -50,12 +50,10 @@ public class BlackJack {
 		do {
 			switch (in) {
 			case "a":
-				this.amountOfPlayers++;
 				this.players.add(new Player());
 				break;
 			case "r":
-				if (this.amountOfPlayers > 0) {
-					this.amountOfPlayers--;
+				if (this.players.size() > 0) {
 					this.players.remove(0);
 				} else {
 					System.out.println("Can't remove any more players.");
@@ -65,7 +63,7 @@ public class BlackJack {
 				System.out.println("Quitting game");
 				break;
 			case "s":
-				this.playRound(this.amountOfPlayers, input);
+				this.playRound(this.players.size(), input);
 				break;
 			default:
 				System.out.println("Please do type a, r, s or q.");
@@ -78,7 +76,7 @@ public class BlackJack {
 	private void playRound(int amountOfPlayers, Scanner input) {
 		Collections.shuffle(deck);
 
-		for (Player player: this.players) {
+		for (Player player : this.players) {
 			this.drawStartingHand(player);
 		}
 
@@ -89,26 +87,34 @@ public class BlackJack {
 		for (int i = 0; i < amountOfPlayers; i++) {
 			System.out.println("Player " + (i + 1) + " has the cards the following cards:");
 			this.players.get(i).printHand();
-			System.out.println("You have a value of " + this.players.get(i).getHandValue() + ". Type c for a card and p to pass");
+			System.out.println(
+					"You have a value of " + this.players.get(i).getHandValue() + ". Type c for a card and p to pass");
+			Timer timer = new Timer();
+			Helper task = new Helper();
+			timer.schedule(task, 10000);
 			String in = input.nextLine();
-			while (!in.equals("p")) {
-					if (in.equals("c")) {
-						Card drawnCard = this.drawCard();
-						this.players.get(i).getHand().add(drawnCard);
-						this.players.get(i).calculateHand();
-						if (this.players.get(i).getHandValue() > 21) {
-							this.players.get(i).setBusted(true);
-							System.out.println("You drew: " + drawnCard.getCardName() + ". You went over 21, you lost");
-							break;
-						}
-						System.out.println("You drew: " + drawnCard.getCardName() + ". You now have a value of "
-								+ this.players.get(i).getHandValue() + ".");
-						in = input.nextLine();
-					} else {
-						System.out.println("Please type c to draw a card or p to pass.");
-						in = input.nextLine();
+			while (!in.equals("p") && !task.getRanOutOfTime()) {
+				task.cancel();
+				task = new Helper();
+				timer.schedule(task, 10000);
+				if (in.equals("c")) {
+					Card drawnCard = this.drawCard();
+					this.players.get(i).getHand().add(drawnCard);
+					this.players.get(i).calculateHand();
+					if (this.players.get(i).getHandValue() > 21) {
+						this.players.get(i).setBusted(true);
+						System.out.println("You drew: " + drawnCard.getCardName() + ". You went over 21, you lost");
+						break;
 					}
+					System.out.println("You drew: " + drawnCard.getCardName() + ". You now have a value of "
+							+ this.players.get(i).getHandValue() + ".");
+					in = input.nextLine();
+				} else {
+					System.out.println("Please type c to draw a card or p to pass.");
+					in = input.nextLine();
+				}
 			}
+			timer.cancel();
 		}
 
 		System.out.println("The dealer reveals his other card: " + this.dealer.getHand().get(1).getCardName());
@@ -126,7 +132,7 @@ public class BlackJack {
 		}
 
 		if (this.dealer.isBusted()) {
-			for (int i = 0; i < this.amountOfPlayers; i++) {
+			for (int i = 0; i < amountOfPlayers; i++) {
 				if (this.players.get(i).isBusted()) {
 					System.out.println("Player " + (i + 1) + " is also busted so the player gets his/her money back.");
 				} else {
@@ -134,7 +140,7 @@ public class BlackJack {
 				}
 			}
 		} else {
-			for (int i = 0; i < this.amountOfPlayers; i++) {
+			for (int i = 0; i < amountOfPlayers; i++) {
 				if (this.players.get(i).isBusted()) {
 					System.out.println("Player " + (i + 1) + " is busted so the dealer wins.");
 				} else {

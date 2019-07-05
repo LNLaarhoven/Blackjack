@@ -1,12 +1,10 @@
 package blackjack;
 
-import java.util.Scanner;
 import java.util.TimerTask;
 
 public class Helper extends TimerTask{
 
 	private boolean ranOutOfTime;
-	private Scanner input;
 	
 	public Helper() {
 		this(false);
@@ -14,10 +12,6 @@ public class Helper extends TimerTask{
 	
 	public Helper(boolean ranOutOfTime) {
 		this.ranOutOfTime = ranOutOfTime;
-	}
-	
-	public Helper(Scanner input) {
-		this.input = input;
 	}
 	
 	public boolean getRanOutOfTime() {
@@ -31,7 +25,7 @@ public class Helper extends TimerTask{
 	@Override
 	public void run() {
 		this.setRanOutOfTime(true);
-		this.input.close();
+		System.out.println("The player took too long to respond and automatically passes, hit return to continue.");
 	}
 
 }
