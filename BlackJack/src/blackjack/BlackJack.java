@@ -15,7 +15,7 @@ public class BlackJack {
 	public BlackJack() {
 		this.initializeDeck();
 		Collections.shuffle(deck);
-		this.startGame();
+		this.playGame();
 	}
 
 	private void initializeDeck() {
@@ -39,15 +39,17 @@ public class BlackJack {
 		}
 	}
 
-	private void startGame() {
+	private void playGame() {
 		Scanner input = new Scanner(System.in);
 		this.players = new ArrayList<>();
 		this.dealer = new Dealer();
-
-		System.out
-				.println("Type in a to add a player, r to remove a player, s to start a round and q to quit the game.");
-		String in = input.nextLine();
-		do {
+		
+		String in = "";
+		
+		while(!in.equals("q")) {
+			System.out
+					.println("Type in a to add a player, r to remove a player, s to start a round and q to quit the game.");
+			in = input.nextLine();
 			switch (in) {
 			case "a":
 				this.players.add(new Player());
@@ -63,17 +65,16 @@ public class BlackJack {
 				System.out.println("Quitting game");
 				break;
 			case "s":
-				this.playRound(this.players.size(), input);
+				this.playRound(input);
 				break;
 			default:
 				System.out.println("Please do type a, r, s or q.");
 
 			}
-			in = input.nextLine();
-		} while (!(in.equals("q")));
+		}
 	}
 
-	private void playRound(int amountOfPlayers, Scanner input) {
+	private void playRound(Scanner input) {
 		Collections.shuffle(deck);
 
 		for (Player player : this.players) {
@@ -84,39 +85,51 @@ public class BlackJack {
 
 		System.out.println("The dealer reveals the card " + this.dealer.getHand().get(0).getCardName());
 
-		for (int i = 0; i < amountOfPlayers; i++) {
-			System.out.println("Player " + (i + 1) + " has the cards the following cards:");
-			this.players.get(i).printHand();
-			System.out.println(
-					"You have a value of " + this.players.get(i).getHandValue() + ". Type c for a card and p to pass");
-			Timer timer = new Timer();
-			Helper task = new Helper();
-			timer.schedule(task, 10000);
-			String in = input.nextLine();
-			while (!in.equals("p") && !task.getRanOutOfTime()) {
-				task.cancel();
-				task = new Helper();
-				timer.schedule(task, 10000);
-				if (in.equals("c")) {
-					Card drawnCard = this.drawCard();
-					this.players.get(i).getHand().add(drawnCard);
-					this.players.get(i).calculateHand();
-					if (this.players.get(i).getHandValue() > 21) {
-						this.players.get(i).setBusted(true);
-						System.out.println("You drew: " + drawnCard.getCardName() + ". You went over 21, you lost");
-						break;
-					}
-					System.out.println("You drew: " + drawnCard.getCardName() + ". You now have a value of "
-							+ this.players.get(i).getHandValue() + ".");
-					in = input.nextLine();
-				} else {
-					System.out.println("Please type c to draw a card or p to pass.");
-					in = input.nextLine();
-				}
-			}
-			timer.cancel();
+		for (Player player: this.players) {
+			this.playerTurn(player, input);
 		}
 
+		this.resolveDealerActions();
+		this.printResults();
+		
+		this.resetForNextRound();
+
+	}
+	
+	private void playerTurn(Player player, Scanner input) {
+		System.out.println("Player " + (this.players.indexOf(player) + 1) + " has the cards the following cards:");
+		player.printHand();
+		System.out.println(
+				"You have a value of " + player.getHandValue() + ". Type c for a card and p to pass");
+		Timer timer = new Timer();
+		Helper task = new Helper();
+		timer.schedule(task, 10000);
+		String in = input.nextLine();
+		while (!in.equals("p") && !task.getRanOutOfTime()) {
+			task.cancel();
+			task = new Helper();
+			timer.schedule(task, 10000);
+			if (in.equals("c")) {
+				Card drawnCard = this.drawCard();
+				player.getHand().add(drawnCard);
+				player.calculateHand();
+				if (player.getHandValue() > 21) {
+					player.setBusted(true);
+					System.out.println("You drew: " + drawnCard.getCardName() + ". You went over 21, you lost");
+					break;
+				}
+				System.out.println("You drew: " + drawnCard.getCardName() + ". You now have a value of "
+						+ player.getHandValue() + ".");
+				in = input.nextLine();
+			} else {
+				System.out.println("Please type c to draw a card or p to pass.");
+				in = input.nextLine();
+			}
+		}
+		timer.cancel();
+	}
+	
+	private void resolveDealerActions() {
 		System.out.println("The dealer reveals his other card: " + this.dealer.getHand().get(1).getCardName());
 		while (dealer.isAllowedCard()) {
 			Card drawnCard = this.drawCard();
@@ -130,32 +143,34 @@ public class BlackJack {
 						"Dealer went over 21! Other players that also lost will get their money back and other players will earn money!");
 			}
 		}
+	}
 
+	private void printResults() {
 		if (this.dealer.isBusted()) {
-			for (int i = 0; i < amountOfPlayers; i++) {
-				if (this.players.get(i).isBusted()) {
-					System.out.println("Player " + (i + 1) + " is also busted so the player gets his/her money back.");
+			for (Player player : this.players) {
+				if (player.isBusted()) {
+					System.out.println("Player " + (this.players.indexOf(player) + 1)
+							+ " is also busted so the player gets his/her money back.");
 				} else {
-					System.out.println("Player " + (i + 1) + " wins!");
+					System.out.println("Player " + (this.players.indexOf(player) + 1) + " wins!");
 				}
 			}
 		} else {
-			for (int i = 0; i < amountOfPlayers; i++) {
-				if (this.players.get(i).isBusted()) {
-					System.out.println("Player " + (i + 1) + " is busted so the dealer wins.");
+			for (Player player : this.players) {
+				if (player.isBusted()) {
+					System.out
+							.println("Player " + (this.players.indexOf(player) + 1) + " is busted so the dealer wins.");
 				} else {
-					if (this.players.get(i).getHandValue() > this.dealer.getHandValue()) {
-						System.out.println("Player " + (i + 1) + " wins!");
-					} else if (this.players.get(i).getHandValue() == this.dealer.getHandValue()) {
-						System.out.println("Player " + (i + 1) + " draws!");
+					if (player.getHandValue() > this.dealer.getHandValue()) {
+						System.out.println("Player " + (this.players.indexOf(player) + 1) + " wins!");
+					} else if (player.getHandValue() == this.dealer.getHandValue()) {
+						System.out.println("Player " + (this.players.indexOf(player) + 1) + " draws!");
 					} else {
-						System.out.println("Player " + (i + 1) + " loses.");
+						System.out.println("Player " + (this.players.indexOf(player) + 1) + " loses.");
 					}
 				}
 			}
 		}
-		this.resetForNextRound();
-
 	}
 
 	private void drawStartingHand(Player player) {
