@@ -2,6 +2,6 @@ package blackjack;
 
 public class Dealer extends Player{
 	public boolean isAllowedCard() {
-		return this.getHandValue() < 17;
+		return this.getSplitHands().get(0).getHandValue() < 17;
 	}
 }
