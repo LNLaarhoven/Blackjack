@@ -1,5 +1,8 @@
 package blackjack;
 
+/*
+ * Class that hold the name of a card and the value of it.
+ */
 public class Card {
 	private String cardName;
 	private int cardValue;
